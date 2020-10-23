@@ -1,12 +1,15 @@
 {
-  "name": "telegraf-i18n",
-  "version": "6.6.0",
-  "description": "Telegraf i18n engine",
+  "name": "@edjopato/telegraf-i18n",
+  "version": "0.1.0",
+  "description": "Telegraf i18n fork built with TypeScript (Pull Request #40)",
   "main": "dist/source",
   "types": "dist/source",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/telegraf/telegraf-i18n.git"
+    "url": "git+ssh://git@github.com/EdJoPaTo/telegraf-i18n.git"
   },
   "keywords": [
     "telegram bot",
@@ -14,7 +17,10 @@
     "bot framework",
     "i18n",
     "internationalization",
-    "middleware"
+    "middleware",
+    "typescript",
+    "types",
+    "typings"
   ],
   "author": "Vitaly Domnikov <oss@vitaly.codes>",
   "license": "MIT",
