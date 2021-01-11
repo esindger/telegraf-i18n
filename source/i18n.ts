@@ -1,9 +1,8 @@
 import * as fs from 'fs'
 import * as path from 'path'
 
-import {Context as TelegrafContext} from 'telegraf'
+import {Context as TelegrafContext, MiddlewareFn} from 'telegraf'
 import {ExtraReplyMessage, Message} from 'telegraf/typings/telegram-types'
-import {MiddlewareFn} from 'telegraf/typings/composer'
 import * as yaml from 'js-yaml'
 
 import {Config, LanguageCode, Repository, RepositoryEntry, TemplateData} from './types'
@@ -55,7 +54,7 @@ export class I18n {
       const fileContent = fs.readFileSync(path.resolve(directory, fileName), 'utf8')
       let data
       if (extension === '.yaml' || extension === '.yml') {
-        data = yaml.safeLoad(fileContent)
+        data = yaml.load(fileContent)
       } else if (extension === '.json') {
         data = JSON.parse(fileContent)
       }
@@ -96,7 +95,7 @@ export class I18n {
 
   resourceKeys(languageCode: LanguageCode): string[] {
     const language = languageCode.toLowerCase()
-    return Object.keys(this.repository[language] || {})
+    return Object.keys(this.repository[language] ?? {})
   }
 
   missingKeys(languageOfInterest: LanguageCode, referenceLanguage = this.config.defaultLanguage): string[] {
