@@ -1,6 +1,6 @@
 import {Config, Repository, TemplateData, Template} from './types'
 
-export class I18nContext {
+export class I18nContext<T extends string = string> {
   readonly config: Config
   readonly repository: Repository
   readonly templateData: Readonly<TemplateData>
@@ -32,12 +32,12 @@ export class I18nContext {
     this.shortLanguageCode = result.shortLanguageCode
   }
 
-  getTemplate(languageCode: string, resourceKey: string): Template | undefined {
+  getTemplate(languageCode: string, resourceKey: T): Template | undefined {
     const repositoryEntry = this.repository[languageCode]
     return repositoryEntry?.[resourceKey]
   }
 
-  t(resourceKey: string, templateData: Readonly<TemplateData> = {}) {
+  t(resourceKey: T, templateData: Readonly<TemplateData> = {}) {
     let template = this.getTemplate(this.languageCode, resourceKey) ?? this.getTemplate(this.shortLanguageCode, resourceKey)
 
     if (!template && this.config.defaultLanguageOnMissing) {

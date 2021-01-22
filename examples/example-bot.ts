@@ -5,17 +5,19 @@ import {Telegraf, Context as TelegrafContext, session} from 'telegraf'
 import {I18n, pluralize, reply} from '../source'
 import {I18nContext} from '../source/context'
 
+type ResourceKey = 'greeting' | 'cart' | 'checkout'
+
 interface Session {
   apples?: number;
 }
 
 interface MyContext extends TelegrafContext {
-  readonly i18n: I18nContext;
+  readonly i18n: I18nContext<ResourceKey>;
   session: Session;
 }
 
 // I18n options
-const i18n = new I18n({
+const i18n = new I18n<ResourceKey>({
   directory: path.resolve(__dirname, 'locales'),
   defaultLanguage: 'en',
   sessionName: 'session',

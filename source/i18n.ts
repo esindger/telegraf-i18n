@@ -15,15 +15,15 @@ const compile = require('compile-template')
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const tableize = require('tableize-object')
 
-interface TelegrafContextWithI18n extends TelegrafContext {
-  i18n: I18nContext;
+interface TelegrafContextWithI18n<T extends string = string> extends TelegrafContext {
+  i18n: I18nContext<T>;
 }
 
 interface Session {
   __language_code?: string;
 }
 
-export class I18n {
+export class I18n<T extends string = string> {
   repository: Repository = {}
   readonly config: Config
 
@@ -116,8 +116,8 @@ export class I18n {
     return (reference - missing) / reference
   }
 
-  createContext(languageCode: LanguageCode, templateData: Readonly<TemplateData>): I18nContext {
-    return new I18nContext(this.repository, this.config, languageCode, templateData)
+  createContext(languageCode: LanguageCode, templateData: Readonly<TemplateData>): I18nContext<T> {
+    return new I18nContext<T>(this.repository, this.config, languageCode, templateData)
   }
 
   middleware(): MiddlewareFn<TelegrafContextWithI18n> {
@@ -126,7 +126,7 @@ export class I18n {
       const session: Session | undefined = this.config.useSession && (ctx as any)[this.config.sessionName]
       const languageCode = session?.__language_code ?? ctx.from?.language_code ?? this.config.defaultLanguage
 
-      ctx.i18n = new I18nContext(
+      ctx.i18n = new I18nContext<T>(
         this.repository,
         this.config,
         languageCode,
@@ -144,7 +144,7 @@ export class I18n {
     }
   }
 
-  t(languageCode: LanguageCode, resourceKey: string, templateData: Readonly<TemplateData> = {}): string {
+  t(languageCode: LanguageCode, resourceKey: T, templateData: Readonly<TemplateData> = {}): string {
     return this.createContext(languageCode, templateData).t(resourceKey)
   }
 }
@@ -165,11 +165,11 @@ function compileTemplates(root: Readonly<Record<string, string>>): RepositoryEnt
 
 /* eslint-disable @typescript-eslint/prefer-readonly-parameter-types */
 
-export function match(resourceKey: string, templateData?: Readonly<TemplateData>): (text: string, ctx: TelegrafContextWithI18n) => string[] | null {
+export function match<T extends string = string>(resourceKey: T, templateData?: Readonly<TemplateData>): (text: string, ctx: TelegrafContextWithI18n) => string[] | null {
   return (text, ctx) => (text && ctx?.i18n && text === ctx.i18n.t(resourceKey, templateData)) ? [text] : null
 }
 
-export function reply(resourceKey: string, extra?: ExtraReplyMessage): (ctx: TelegrafContextWithI18n) => Promise<Message> {
+export function reply<T extends string = string>(resourceKey: T, extra?: ExtraReplyMessage): (ctx: TelegrafContextWithI18n<T>) => Promise<Message> {
   return async ctx => ctx.reply(ctx.i18n.t(resourceKey), extra)
 }
 
