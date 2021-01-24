@@ -13,7 +13,7 @@ export function generateTypes (i18nData: Readonly<Record<string, unknown>>, outp
     generateResourceKeyType(resourceKeys),
     generateTemplateParams(templates, resourceKeys)
   ]
-  const outputContent = types.join('\n\n')
+  const outputContent = types.join('\n\n').trim() + '\n'
 
   if (output) {
     writeFileSync(resolve(__dirname, output), outputContent, 'utf8')
@@ -28,20 +28,20 @@ function generateTemplateParams (templates: Readonly<Record<string, string>>, re
     if (template) {
       const templateParams = parseTemplateParams(template)
       if (templateParams.length) {
-        params.push(`  ${resourceKey}: {\n${templateParams.join('\n')}\n  }`)
+        params.push(`  '${resourceKey}': {\n${templateParams.join('\n')}\n  }`)
       } else {
-        params.push(`  ${resourceKey}: never`)
+        params.push(`  '${resourceKey}': never`)
       }
     }
   })
 
-  return `export interface ResourceParams {\n${params.join('\\n')}\n}`
+  return `export interface ResourceParams {\n${params.join('\n')}\n}`
 }
 
 function generateResourceKeyType (resourceKeys: string[]) {
   return `
 export type ResourceKey =
-${resourceKeys.map((resourceKey) => ` "${resourceKey}"`).join('\n  | ')}`
+${resourceKeys.map((resourceKey) => `'${resourceKey}'`).join('\n  | ')}`
 }
 
 function parseTemplateParams (template: string): string[] {
