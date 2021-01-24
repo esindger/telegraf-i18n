@@ -1,9 +1,8 @@
 import test from 'ava'
 
-import {Config, Repository} from '../source'
-import {I18nContext} from '../source/context'
+import { Config, I18nContext, Repository, RepositoryData } from '../src'
 
-const EXAMPLE_REPO: Readonly<Repository> = {
+const EXAMPLE_REPO: Readonly<Repository<RepositoryData>> = {
   en: {
     desk: () => 'desk',
     foo: () => 'bar'

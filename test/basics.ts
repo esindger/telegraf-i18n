@@ -1,6 +1,6 @@
 import test from 'ava'
 
-import {I18n} from '../source/i18n'
+import {I18n} from '../src'
 
 test('can translate', t => {
   const i18n = new I18n()

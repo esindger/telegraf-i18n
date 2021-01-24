@@ -3,8 +3,9 @@ export type LanguageCode = string
 export type TemplateData = Record<string, unknown>
 export type Template = (data: Readonly<TemplateData>) => string
 
-export type RepositoryEntry = Record<string, Template>
-export type Repository = Record<LanguageCode, Readonly<RepositoryEntry>>
+export type RepositoryData = Record<string, Record<string, unknown> | never>
+export type RepositoryEntry<RepositoryT> = Record<keyof RepositoryT, Template>
+export type Repository<RepositoryT> = Record<LanguageCode, Readonly<RepositoryEntry<RepositoryT>>>
 
 export interface Config {
   readonly allowMissing?: boolean;

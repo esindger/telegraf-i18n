@@ -1,13 +1,13 @@
-import {Config, Repository, TemplateData, Template} from './types'
+import { Config, Repository, TemplateData, Template, RepositoryData } from './types'
 
-export class I18nContext<T extends string = string> {
+export class I18nContext<RepositoryT = RepositoryData> {
   readonly config: Config
-  readonly repository: Repository
+  readonly repository: Repository<RepositoryT>
   readonly templateData: Readonly<TemplateData>
   languageCode: string
   shortLanguageCode: string
 
-  constructor(repository: Readonly<Repository>, config: Config, languageCode: string, templateData: Readonly<TemplateData>) {
+  constructor(repository: Readonly<Repository<RepositoryT>>, config: Config, languageCode: string, templateData: Readonly<TemplateData>) {
     this.repository = repository
     this.config = config
     this.templateData = {
@@ -32,12 +32,12 @@ export class I18nContext<T extends string = string> {
     this.shortLanguageCode = result.shortLanguageCode
   }
 
-  getTemplate(languageCode: string, resourceKey: T): Template | undefined {
+  getTemplate(languageCode: string, resourceKey: keyof RepositoryT): Template | undefined {
     const repositoryEntry = this.repository[languageCode]
     return repositoryEntry?.[resourceKey]
   }
 
-  t(resourceKey: T, templateData: Readonly<TemplateData> = {}) {
+  t<T extends keyof RepositoryT>(resourceKey: T, templateData?: Readonly<RepositoryT[T]>) {
     let template = this.getTemplate(this.languageCode, resourceKey) ?? this.getTemplate(this.shortLanguageCode, resourceKey)
 
     if (!template && this.config.defaultLanguageOnMissing) {
@@ -45,7 +45,7 @@ export class I18nContext<T extends string = string> {
     }
 
     if (!template && this.config.allowMissing) {
-      template = () => resourceKey
+      template = () => resourceKey as string
     }
 
     if (!template) {
@@ -67,7 +67,7 @@ export class I18nContext<T extends string = string> {
   }
 }
 
-function parseLanguageCode(repository: Readonly<Repository>, defaultLanguage: string, languageCode: string): {languageCode: string; shortLanguageCode: string} {
+function parseLanguageCode<RepositoryT>(repository: Readonly<Repository<RepositoryT>>, defaultLanguage: string, languageCode: string): {languageCode: string; shortLanguageCode: string} {
   let code = languageCode.toLowerCase()
   const shortCode = shortLanguageCodeFromLong(code)
 

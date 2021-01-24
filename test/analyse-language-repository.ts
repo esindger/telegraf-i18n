@@ -1,6 +1,6 @@
 import test from 'ava'
 
-import {I18n} from '../source/i18n'
+import { I18n } from '../src'
 
 test('resourceKeys flat', t => {
   const i18n = new I18n()
@@ -41,7 +41,7 @@ test('resourceKeys of not existing locale are empty', t => {
   t.deepEqual(i18n.resourceKeys('de'), [])
 })
 
-function createMultiLanguageExample() {
+function createMultiLanguageExample () {
   const i18n = new I18n()
   i18n.loadLocale('en', {
     greeting: 'Hello!',

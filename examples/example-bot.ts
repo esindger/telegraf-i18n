@@ -2,22 +2,28 @@ import * as path from 'path'
 
 import {Telegraf, Context as TelegrafContext, session} from 'telegraf'
 
-import {I18n, pluralize, reply} from '../source'
-import {I18nContext} from '../source/context'
+import {I18n, pluralize, reply} from '../src'
+import {I18nContext} from '../src'
 
-type ResourceKey = 'greeting' | 'cart' | 'checkout'
+interface Repository {
+  greeting: never
+  cart: {
+    apples: number
+  }
+  checkout: never
+}
 
 interface Session {
   apples?: number;
 }
 
 interface MyContext extends TelegrafContext {
-  readonly i18n: I18nContext<ResourceKey>;
+  readonly i18n: I18nContext<Repository>;
   session: Session;
 }
 
 // I18n options
-const i18n = new I18n<ResourceKey>({
+const i18n = new I18n<Repository>({
   directory: path.resolve(__dirname, 'locales'),
   defaultLanguage: 'en',
   sessionName: 'session',

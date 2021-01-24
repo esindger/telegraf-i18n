@@ -2,7 +2,7 @@
   "extends": "@sindresorhus/tsconfig",
   "include": [
     "examples",
-    "source",
+    "src",
     "test"
   ],
   "compilerOptions": {
