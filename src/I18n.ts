@@ -75,8 +75,9 @@ export class I18n<RepositoryT = RepositoryData> {
       } else if (extension === '.json') {
         data = JSON.parse(fileContent)
       }
-
-      this.loadLocale(languageCode, tableize(data))
+      if(data) {
+        this.loadLocale(languageCode, tableize(data))
+      }
     }
   }
 

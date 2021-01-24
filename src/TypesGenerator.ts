@@ -7,7 +7,7 @@ import { LanguageCode } from './types'
 const { parse, traverse } = require('abstract-syntax-tree')
 
 export class TypesGenerator extends I18n {
-  templates: Record<string, Record<string, string>> = {}
+  templates: Record<string, Record<string, string>>
 
   generateTypes (output?: string): string {
     const resourceKeys = this.resourceKeys(this.config.defaultLanguage)
@@ -26,8 +26,8 @@ export class TypesGenerator extends I18n {
 
   loadLocale (languageCode: LanguageCode, i18nData: Readonly<Record<string, unknown>>): void {
     const language = languageCode.toLowerCase()
-    this.templates[language] = {
-      ...this.templates[language],
+    this.templates[language] ??= {
+      ...this.templates?.[language],
       ...prepareI18nData(i18nData)
     }
   }
