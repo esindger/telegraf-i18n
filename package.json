@@ -1,6 +1,6 @@
 {
   "name": "@esindger/telegraf-i18n",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Telegraf i18n engine",
   "main": "dist/src",
   "types": "dist/src",
