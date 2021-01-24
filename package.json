@@ -2,8 +2,8 @@
   "name": "@esindger/telegraf-i18n",
   "version": "0.1.0",
   "description": "Telegraf i18n engine",
-  "main": "dist/source",
-  "types": "dist/source",
+  "main": "dist/src",
+  "types": "dist/src",
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/esindger/telegraf-i18n.git"
@@ -33,7 +33,7 @@
     "build": "del-cli dist && tsc",
     "prepack": "npm run build",
     "start": "ts-node examples/example-bot.ts",
-    "test": "tsc --sourceMap && nyc ava"
+    "test": "tsc --srcMap && nyc ava"
   },
   "dependencies": {
     "abstract-syntax-tree": "^2.15.3",
@@ -62,8 +62,8 @@
       ".ts"
     ],
     "include": [
-      "dist/source",
-      "source"
+      "dist/src",
+      "src"
     ],
     "exclude": [
       "**/*.d.ts",
