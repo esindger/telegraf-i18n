@@ -6,7 +6,7 @@
   "types": "dist/source",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/telegraf/telegraf-i18n.git"
+    "url": "git+ssh://git@github.com/esindger/telegraf-i18n.git"
   },
   "keywords": [
     "telegram bot",
@@ -19,9 +19,9 @@
   "author": "Vitaly Domnikov <oss@vitaly.codes>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/telegraf/telegraf-i18n/issues"
+    "url": "https://github.com/esindger/telegraf-i18n/issues"
   },
-  "homepage": "https://github.com/telegraf/telegraf-i18n#readme",
+  "homepage": "https://github.com/esindger/telegraf-i18n#readme",
   "engines": {
     "node": ">=12"
   },
