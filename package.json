@@ -1,5 +1,5 @@
 {
-  "name": "telegraf-i18n",
+  "name": "@esindger/telegraf-i18n",
   "version": "0.0.1",
   "description": "Telegraf i18n engine",
   "main": "dist/source",
