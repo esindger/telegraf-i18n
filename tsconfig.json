@@ -1,11 +1,30 @@
 {
-  "extends": "@sindresorhus/tsconfig",
+  "compilerOptions": {
+    "module": "commonjs",
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "noImplicitAny": false,
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "target": "es2019",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "lib": ["es2019", "dom"]
+  },
   "include": [
     "examples",
     "src",
     "test"
   ],
-  "compilerOptions": {
-    "outDir": "dist"
-  }
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

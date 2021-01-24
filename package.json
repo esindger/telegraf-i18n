@@ -33,7 +33,7 @@
     "build": "del-cli dist && tsc",
     "prepack": "npm run build",
     "start": "ts-node examples/example-bot.ts",
-    "test": "tsc --srcMap && nyc ava"
+    "test": "tsc --sourceMap && nyc ava"
   },
   "dependencies": {
     "abstract-syntax-tree": "^2.15.3",
@@ -46,7 +46,6 @@
     "telegraf": "^4.0.0"
   },
   "devDependencies": {
-    "@sindresorhus/tsconfig": "^0.8.0",
     "@types/js-yaml": "^4.0.0",
     "@types/node": "^14.0.5",
     "ava": "^3.0.0",
