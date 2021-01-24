@@ -26,7 +26,7 @@
     "node": ">=12"
   },
   "files": [
-    "dist/source",
+    "dist/src",
     "!*.test.*"
   ],
   "scripts": {
@@ -73,5 +73,9 @@
       "lcov",
       "text"
     ]
+  },
+  "np": {
+    "yarn": false,
+    "contents": "dist"
   }
 }
