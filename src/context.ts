@@ -1,4 +1,4 @@
-import { Config, Repository, TemplateData, Template, RepositoryData } from './types'
+import { Config, Repository, TemplateData, Template, RepositoryData, NeverKeys } from './types'
 
 export class I18nContext<RepositoryT = RepositoryData> {
   readonly config: Config
@@ -37,7 +37,9 @@ export class I18nContext<RepositoryT = RepositoryData> {
     return repositoryEntry?.[resourceKey]
   }
 
-  t<T extends keyof RepositoryT>(resourceKey: T, templateData?: Readonly<RepositoryT[T]>) {
+  t<T extends keyof RepositoryT>(resourceKey: T): [RepositoryT[T]] extends [never] ? string : never
+  t<T extends keyof RepositoryT>(resourceKey: T, templateData: Readonly<RepositoryT[T]>): string
+  t<T extends keyof RepositoryT>(resourceKey: T, templateData?: Readonly<RepositoryT[T]>): string {
     let template = this.getTemplate(this.languageCode, resourceKey) ?? this.getTemplate(this.shortLanguageCode, resourceKey)
 
     if (!template && this.config.defaultLanguageOnMissing) {

@@ -7,7 +7,7 @@ import { ExtraReplyMessage, Message } from 'telegraf/typings/telegram-types'
 import { I18nContext } from './context'
 import { pluralize } from './pluralize'
 
-import { Config, LanguageCode, Repository, RepositoryData, RepositoryEntry, TemplateData } from './types'
+import { Config, LanguageCode, NeverKeys, Repository, RepositoryData, RepositoryEntry, TemplateData } from './types'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const compile = require('compile-template')
@@ -75,7 +75,7 @@ export class I18n<RepositoryT = RepositoryData> {
       } else if (extension === '.json') {
         data = JSON.parse(fileContent)
       }
-      if(data) {
+      if (data) {
         this.loadLocale(languageCode, tableize(data))
       }
     }
@@ -130,12 +130,13 @@ export class I18n<RepositoryT = RepositoryData> {
     return Object.keys(this.repository[language] ?? {})
   }
 
-  t <T extends keyof RepositoryT>(
+  t<T extends keyof RepositoryT> (
     languageCode: LanguageCode,
     resourceKey: keyof RepositoryT,
     templateData?: Readonly<RepositoryT[T]>
-    ): string {
-    return this.createContext(languageCode, templateData || {}).t(resourceKey, templateData)
+  ): string | never {
+    const i18nContext = this.createContext(languageCode, templateData || {})
+    return templateData ? i18nContext.t(resourceKey, templateData) : i18nContext.t(resourceKey)
   }
 
   translationProgress (languageOfInterest: LanguageCode, referenceLanguage = this.config.defaultLanguage): number {
@@ -174,21 +175,28 @@ function compileTemplates<RepositoryT extends RepositoryData> (root: Readonly<Re
 
 /* eslint-disable @typescript-eslint/prefer-readonly-parameter-types */
 
-export function match<RepositoryT extends RepositoryData, T extends keyof RepositoryT> (
-  resourceKey: T,
-  templateData: Readonly<RepositoryT[T]>
-): (
-  text: string, ctx: TelegrafContextWithI18n<RepositoryT>) => string[] | null {
+export function match<RepositoryT> (resourceKey: NeverKeys<RepositoryT>): (
+  text: string, ctx: TelegrafContextWithI18n<RepositoryT>) => RegExpExecArray | null {
   return (text, ctx) => (text && ctx?.i18n &&
-    text === ctx.i18n.t(resourceKey, templateData)) ? [text] : null
+    text === ctx.i18n.t(resourceKey)) ? [text] as RegExpExecArray : null
 }
 
-export function reply<RepositoryT extends RepositoryData, T extends keyof RepositoryT> (
-  resourceKey: keyof RepositoryT,
-  templateData: Readonly<RepositoryT[T]>,
+export function reply<RepositoryT> (
+  resourceKey: NeverKeys<RepositoryT>,
+  templateData: null,
+  extra?: ExtraReplyMessage
+): (ctx: TelegrafContextWithI18n<RepositoryT>) => Promise<Message>
+export function reply<RepositoryT, T extends keyof RepositoryT> (
+  resourceKey: T,
+  templateData: RepositoryT[T],
+  extra?: ExtraReplyMessage
+): (ctx: TelegrafContextWithI18n<RepositoryT>) => Promise<Message>
+export function reply<RepositoryT, T extends keyof RepositoryT> (
+  resourceKey: T,
+  templateData: RepositoryT[T] | null,
   extra?: ExtraReplyMessage
 ): (ctx: TelegrafContextWithI18n<RepositoryT>) => Promise<Message> {
-  return async ctx => ctx.reply(ctx.i18n.t(resourceKey, templateData), extra)
+  return async (ctx) => ctx.reply(ctx.i18n.t(resourceKey), extra)
 }
 
 /* eslint-enable @typescript-eslint/prefer-readonly-parameter-types */

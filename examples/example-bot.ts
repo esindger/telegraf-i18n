@@ -2,7 +2,7 @@ import * as path from 'path'
 
 import {Telegraf, Context as TelegrafContext, session} from 'telegraf'
 
-import {I18n, pluralize, reply} from '../src'
+import { I18n, NeverKeys, pluralize, reply, match } from '../src'
 import {I18nContext} from '../src'
 
 interface Repository {
@@ -42,18 +42,29 @@ bot.use(i18n.middleware())
 bot.start(async ctx => ctx.replyWithHTML(ctx.i18n.t('greeting')))
 
 // Using i18n helpers
-bot.command('help', reply('greeting', {parse_mode: 'HTML'}))
+bot.command('greeting', reply('greeting', null, {parse_mode: 'HTML'}))
+bot.command('cart', reply('cart', { apples: 3 }, {parse_mode: 'HTML'}))
+
+bot.hears(match('greeting'), (ctx) => {
+  //
+})
 
 // Set locale to `en`
 bot.command('en', async ctx => {
   ctx.i18n.locale('en-US')
+  const t = ctx.i18n.t('cart')
+  const t2 = ctx.i18n.t('greeting')
+  const t3 = ctx.i18n.t('cart', { apples: 3 })
+  type TT = NeverKeys<Repository>
   return ctx.replyWithHTML(ctx.i18n.t('greeting'))
 })
+
+type TT = Pick<Repository, NeverKeys<Repository>>
 
 // Set locale to `ru`
 bot.command('ru', async ctx => {
   ctx.i18n.locale('ru')
-  return ctx.replyWithHTML(ctx.i18n.t('greeting'))
+  return ctx.replyWithHTML(ctx.i18n.t('cart'))
 })
 
 // Add apple to cart

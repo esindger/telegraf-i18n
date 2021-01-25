@@ -1,5 +1,8 @@
 export type LanguageCode = string
 
+type IsNeverKey<T,K> = [T] extends [never] ? K : never;
+export type NeverKeys<T> = { [K in keyof T]-?: IsNeverKey<T[K], K> }[keyof T]
+
 export type TemplateData = Record<string, unknown>
 export type Template = (data: Readonly<TemplateData>) => string
 
