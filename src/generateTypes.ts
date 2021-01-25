@@ -10,8 +10,8 @@ export function generateTypes (i18nData: Readonly<Record<string, unknown>>, outp
   const resourceKeys = Object.keys(templates)
 
   const types: string[] = [
-    generateResourceKeyType(resourceKeys),
-    generateTemplateParams(templates, resourceKeys)
+    generateTemplateParams(templates, resourceKeys),
+    generateResourceKeyType()
   ]
   const outputContent = types.join('\n\n').trim() + '\n'
 
@@ -35,13 +35,11 @@ function generateTemplateParams (templates: Readonly<Record<string, string>>, re
     }
   })
 
-  return `export interface ResourceParams {\n${params.join('\n')}\n}`
+  return `export interface I18nResourceParams {\n${params.join('\n')}\n}`
 }
 
-function generateResourceKeyType (resourceKeys: string[]) {
-  return `
-export type ResourceKey =
-${resourceKeys.map((resourceKey) => `'${resourceKey}'`).join('\n  | ')}`
+function generateResourceKeyType () {
+  return 'export type I18nResourceKey = keyof I18nResourceParams'
 }
 
 function parseTemplateParams (template: string): string[] {
