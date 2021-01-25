@@ -5,20 +5,14 @@ import { prepareI18nData } from './I18n'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { parse, traverse } = require('abstract-syntax-tree')
 
-export interface ResourceDefinitions {
-  Identifier?: Record<string, string>,
-  MemberExpression?: Record<string, string>,
-  CallExpression?: Record<string, string>
-}
-
 export function generateTypes (
   i18nData: Readonly<Record<string, unknown>>,
   output?: string,
-  definitions?: ResourceDefinitions
+  globalTemplateData?: string[]
 ): string {
   const templates = prepareI18nData(i18nData)
   const types: string[] = [
-    generateTemplateParams(templates, definitions),
+    generateTemplateParams(templates, globalTemplateData),
     generateResourceKeyType()
   ]
   const outputContent = types.join('\n\n').trim() + '\n'
@@ -29,12 +23,12 @@ export function generateTypes (
   return outputContent
 }
 
-function generateTemplateParams (templates: Readonly<Record<string, string>>, definitions?: ResourceDefinitions) {
+function generateTemplateParams (templates: Readonly<Record<string, string>>, globalTemplateData?: string[]) {
   const params: string[] = []
   Object.keys(templates).forEach((resourceKey) => {
     const template: string | null = templates[resourceKey] ?? null
     if (template) {
-      const templateParams = parseTemplateParams(resourceKey, template, definitions)
+      const templateParams = parseTemplateParams(resourceKey, template, globalTemplateData)
       if (templateParams.length) {
         params.push(`  '${resourceKey}': {\n${templateParams.join('\n')}\n  }`)
       } else {
@@ -50,12 +44,12 @@ function generateResourceKeyType () {
   return 'export type I18nResourceKey = keyof I18nResourceParams'
 }
 
-function parseTemplateParams (resourceKey: string, template: string, definitions?: ResourceDefinitions): string[] {
+function parseTemplateParams (resourceKey: string, template: string, globalTemplateData?: string[]): string[] {
   try {
-    const output: string[] = []
+    const output = new Set<string>()
     const tree = parse(`\`${template.replace(/`/g, '\\\`')}\``)
     const objectValueType = 'Record<string, unknown>'
-    const allValueTypes = `string | number | ${objectValueType}`
+    const scalarValueTypes = 'string | number'
     const functionType = '(...args: unknown[]) => string | number'
 
     let skipNode: any = null
@@ -66,12 +60,16 @@ function parseTemplateParams (resourceKey: string, template: string, definitions
         }
         switch (node.type) {
           case 'Identifier': {
-            output.push(`    ${node.name}: ${definitions?.Identifier?.[node.name] ?? allValueTypes}`)
+            if(!globalTemplateData?.includes(node.name)) {
+              output.add(`    ${node.name}: ${scalarValueTypes}`)
+            }
             break
           }
           case 'MemberExpression': {
             skipNode = node
-            output.push(`    ${node.object.name}: ${definitions?.MemberExpression?.[node.name] ?? objectValueType}`)
+            if(!globalTemplateData?.includes(node.object.name)) {
+              output.add(`    ${node.object.name}: ${objectValueType}`)
+            }
             break
           }
           case 'CallExpression': {
@@ -79,12 +77,14 @@ function parseTemplateParams (resourceKey: string, template: string, definitions
             if (node.arguments?.length) {
               node.arguments.forEach((argument: any) => {
                 const argumentName = argument.name || argument.object?.name
-                if(argumentName) {
-                  output.push(`    ${argumentName}: ${allValueTypes}`)
+                if(argumentName && !globalTemplateData?.includes(argumentName)) {
+                  output.add(`    ${argumentName}: ${scalarValueTypes}`)
                 }
               })
             }
-            output.push(`    ${node.callee.name}: ${definitions?.CallExpression?.[node.name] ?? functionType}`)
+            if(!globalTemplateData?.includes(node.object.name)) {
+              output.add(`    ${node.callee.name}: ${functionType}`)
+            }
             break
           }
         }
@@ -96,7 +96,7 @@ function parseTemplateParams (resourceKey: string, template: string, definitions
       }
     })
 
-    return output
+    return Array.from(output)
   } catch (e) {
     console.error(`Parsing of the key '${resourceKey}' failed. Template:\n${template}`)
     throw e
