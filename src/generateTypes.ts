@@ -26,7 +26,7 @@ function generateTemplateParams (templates: Readonly<Record<string, string>>, re
   resourceKeys.forEach((resourceKey) => {
     const template: string | null = templates[resourceKey] ?? null
     if (template) {
-      const templateParams = parseTemplateParams(template)
+      const templateParams = parseTemplateParams(resourceKey, template)
       if (templateParams.length) {
         params.push(`  '${resourceKey}': {\n${templateParams.join('\n')}\n  }`)
       } else {
@@ -42,47 +42,51 @@ function generateResourceKeyType () {
   return 'export type I18nResourceKey = keyof I18nResourceParams'
 }
 
-function parseTemplateParams (template: string): string[] {
-  const output: string[] = []
+function parseTemplateParams (resourceKey: string, template: string): string[] {
+  try {
+    const output: string[] = []
+    const tree = parse(`\`${template.replace(/`/g, '\\\`')}\``)
+    const objectValueType = 'Record<string, unknown>'
+    const allValueTypes = `string | number | ${objectValueType}`
 
-  const tree = parse(template)
-  const objectValueType = 'Record<string, unknown>'
-  const allValueTypes = `string | number | ${objectValueType}`
-
-  let skipNode: any = null
-  traverse(tree, {
-    enter (node: any) {
-      if (skipNode) {
-        return
-      }
-      switch (node.type) {
-        case 'Identifier': {
-          output.push(`    ${node.name}: ${allValueTypes}`)
-          break
+    let skipNode: any = null
+    traverse(tree, {
+      enter (node: any) {
+        if (skipNode) {
+          return
         }
-        case 'MemberExpression': {
-          skipNode = node
-          output.push(`    ${node.object.name}: ${objectValueType}`)
-          break
-        }
-        case 'CallExpression': {
-          skipNode = node
-          if (node.arguments?.length) {
-            node.arguments.forEach((argument: any) => {
-              output.push(`    ${argument.name || argument.object.name}: ${allValueTypes}`)
-            })
+        switch (node.type) {
+          case 'Identifier': {
+            output.push(`    ${node.name}: ${allValueTypes}`)
+            break
           }
-          output.push(`    ${node.callee.name}: (...args: unknown[]) => string | number`)
-          break
+          case 'MemberExpression': {
+            skipNode = node
+            output.push(`    ${node.object.name}: ${objectValueType}`)
+            break
+          }
+          case 'CallExpression': {
+            skipNode = node
+            if (node.arguments?.length) {
+              node.arguments.forEach((argument: any) => {
+                output.push(`    ${argument.name || argument.object.name}: ${allValueTypes}`)
+              })
+            }
+            output.push(`    ${node.callee.name}: (...args: unknown[]) => string | number`)
+            break
+          }
+        }
+      },
+      leave (node: any) {
+        if (skipNode === node) {
+          skipNode = null
         }
       }
-    },
-    leave (node: any) {
-      if (skipNode === node) {
-        skipNode = null
-      }
-    }
-  })
+    })
 
-  return output
+    return output
+  } catch (e) {
+    console.error(`Parsing of the key '${resourceKey}' failed. Template:\n${template}`)
+    throw e
+  }
 }
