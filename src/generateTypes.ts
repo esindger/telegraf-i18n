@@ -78,7 +78,10 @@ function parseTemplateParams (resourceKey: string, template: string, definitions
             skipNode = node
             if (node.arguments?.length) {
               node.arguments.forEach((argument: any) => {
-                output.push(`    ${argument.name || argument.object.name}: ${allValueTypes}`)
+                const argumentName = argument.name || argument.object?.name
+                if(argumentName) {
+                  output.push(`    ${argumentName}: ${allValueTypes}`)
+                }
               })
             }
             output.push(`    ${node.callee.name}: ${definitions?.CallExpression?.[node.name] ?? functionType}`)
