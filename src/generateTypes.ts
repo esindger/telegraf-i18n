@@ -5,12 +5,20 @@ import { prepareI18nData } from './I18n'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { parse, traverse } = require('abstract-syntax-tree')
 
-export function generateTypes (i18nData: Readonly<Record<string, unknown>>, output?: string): string {
-  const templates = prepareI18nData(i18nData)
-  const resourceKeys = Object.keys(templates)
+export interface ResourceDefinitions {
+  Identifier?: Record<string, string>,
+  MemberExpression?: Record<string, string>,
+  CallExpression?: Record<string, string>
+}
 
+export function generateTypes (
+  i18nData: Readonly<Record<string, unknown>>,
+  output?: string,
+  definitions?: ResourceDefinitions
+): string {
+  const templates = prepareI18nData(i18nData)
   const types: string[] = [
-    generateTemplateParams(templates, resourceKeys),
+    generateTemplateParams(templates, definitions),
     generateResourceKeyType()
   ]
   const outputContent = types.join('\n\n').trim() + '\n'
@@ -21,12 +29,12 @@ export function generateTypes (i18nData: Readonly<Record<string, unknown>>, outp
   return outputContent
 }
 
-function generateTemplateParams (templates: Readonly<Record<string, string>>, resourceKeys: string[]) {
+function generateTemplateParams (templates: Readonly<Record<string, string>>, definitions?: ResourceDefinitions) {
   const params: string[] = []
-  resourceKeys.forEach((resourceKey) => {
+  Object.keys(templates).forEach((resourceKey) => {
     const template: string | null = templates[resourceKey] ?? null
     if (template) {
-      const templateParams = parseTemplateParams(resourceKey, template)
+      const templateParams = parseTemplateParams(resourceKey, template, definitions)
       if (templateParams.length) {
         params.push(`  '${resourceKey}': {\n${templateParams.join('\n')}\n  }`)
       } else {
@@ -42,12 +50,13 @@ function generateResourceKeyType () {
   return 'export type I18nResourceKey = keyof I18nResourceParams'
 }
 
-function parseTemplateParams (resourceKey: string, template: string): string[] {
+function parseTemplateParams (resourceKey: string, template: string, definitions?: ResourceDefinitions): string[] {
   try {
     const output: string[] = []
     const tree = parse(`\`${template.replace(/`/g, '\\\`')}\``)
     const objectValueType = 'Record<string, unknown>'
     const allValueTypes = `string | number | ${objectValueType}`
+    const functionType = '(...args: unknown[]) => string | number'
 
     let skipNode: any = null
     traverse(tree, {
@@ -57,12 +66,12 @@ function parseTemplateParams (resourceKey: string, template: string): string[] {
         }
         switch (node.type) {
           case 'Identifier': {
-            output.push(`    ${node.name}: ${allValueTypes}`)
+            output.push(`    ${node.name}: ${definitions?.Identifier?.[node.name] ?? allValueTypes}`)
             break
           }
           case 'MemberExpression': {
             skipNode = node
-            output.push(`    ${node.object.name}: ${objectValueType}`)
+            output.push(`    ${node.object.name}: ${definitions?.MemberExpression?.[node.name] ?? objectValueType}`)
             break
           }
           case 'CallExpression': {
@@ -72,7 +81,7 @@ function parseTemplateParams (resourceKey: string, template: string): string[] {
                 output.push(`    ${argument.name || argument.object.name}: ${allValueTypes}`)
               })
             }
-            output.push(`    ${node.callee.name}: (...args: unknown[]) => string | number`)
+            output.push(`    ${node.callee.name}: ${definitions?.CallExpression?.[node.name] ?? functionType}`)
             break
           }
         }
