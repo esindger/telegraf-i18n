@@ -82,7 +82,7 @@ function parseTemplateParams (resourceKey: string, template: string, globalTempl
                 }
               })
             }
-            if(!globalTemplateData?.includes(node.object.name)) {
+            if(!globalTemplateData?.includes(node.callee.name)) {
               output.add(`    ${node.callee.name}: ${functionType}`)
             }
             break
@@ -98,7 +98,7 @@ function parseTemplateParams (resourceKey: string, template: string, globalTempl
 
     return Array.from(output)
   } catch (e) {
-    console.error(`Parsing of the key '${resourceKey}' failed. Template:\n${template}`)
+    console.error(`telegraf-i18n: parsing of the key '${resourceKey}' failed, template:\n${template}`)
     throw e
   }
 }

@@ -87,9 +87,7 @@ export class I18n<RepositoryT = RepositoryData> {
       const session: Session | undefined = this.config.useSession && (ctx as any)[this.config.sessionName]
       const languageCode = session?.__language_code ?? ctx.from?.language_code ?? this.config.defaultLanguage
 
-      ctx.i18n = new I18nContext<RepositoryT>(
-        this.repository,
-        this.config,
+      ctx.i18n = this.createContext(
         languageCode,
         {
           from: ctx.from,

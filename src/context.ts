@@ -1,13 +1,20 @@
-import { Config, Repository, TemplateData, Template, RepositoryData, NeverKeys } from './types'
+import { Config, Repository, RepositoryData, Template, TemplateData } from './types'
 
 export class I18nContext<RepositoryT = RepositoryData> {
   readonly config: Config
+
   readonly repository: Repository<RepositoryT>
+
   readonly templateData: Readonly<TemplateData>
+
   languageCode: string
+
   shortLanguageCode: string
 
-  constructor(repository: Readonly<Repository<RepositoryT>>, config: Config, languageCode: string, templateData: Readonly<TemplateData>) {
+  constructor (
+    repository: Readonly<Repository<RepositoryT>>, config: Config, languageCode: string,
+    templateData: Readonly<TemplateData>
+  ) {
     this.repository = repository
     this.config = config
     this.templateData = {
@@ -20,9 +27,14 @@ export class I18nContext<RepositoryT = RepositoryData> {
     this.shortLanguageCode = result.shortLanguageCode
   }
 
-  locale(): string;
-  locale(languageCode: string): void;
-  locale(languageCode?: string): void | string {
+  getTemplate (languageCode: string, resourceKey: keyof RepositoryT): Template | undefined {
+    const repositoryEntry = this.repository[languageCode]
+    return repositoryEntry?.[resourceKey]
+  }
+
+  locale (): string
+  locale (languageCode: string): void
+  locale (languageCode?: string): void | string {
     if (!languageCode) {
       return this.languageCode
     }
@@ -32,14 +44,9 @@ export class I18nContext<RepositoryT = RepositoryData> {
     this.shortLanguageCode = result.shortLanguageCode
   }
 
-  getTemplate(languageCode: string, resourceKey: keyof RepositoryT): Template | undefined {
-    const repositoryEntry = this.repository[languageCode]
-    return repositoryEntry?.[resourceKey]
-  }
-
-  t<T extends keyof RepositoryT>(resourceKey: T): [RepositoryT[T]] extends [never] ? string : never
-  t<T extends keyof RepositoryT>(resourceKey: T, templateData: Readonly<RepositoryT[T]>): string
-  t<T extends keyof RepositoryT>(resourceKey: T, templateData?: Readonly<RepositoryT[T]>): string {
+  t<T extends keyof RepositoryT> (resourceKey: T): [RepositoryT[T]] extends [never] ? string : never
+  t<T extends keyof RepositoryT> (resourceKey: T, templateData: Readonly<RepositoryT[T]>): string
+  t<T extends keyof RepositoryT> (resourceKey: T, templateData?: Readonly<RepositoryT[T]>): string {
     let template = this.getTemplate(this.languageCode, resourceKey) ?? this.getTemplate(this.shortLanguageCode, resourceKey)
 
     if (!template && this.config.defaultLanguageOnMissing) {
@@ -65,11 +72,21 @@ export class I18nContext<RepositoryT = RepositoryData> {
       }
     }
 
-    return template(data)
+    let content = ''
+    try {
+      content = template(data)
+    } catch (e) {
+      throw new Error(`telegraf-i18n: '${this.languageCode}.${resourceKey}' compile error.`)
+    }
+
+    return content
   }
 }
 
-function parseLanguageCode<RepositoryT>(repository: Readonly<Repository<RepositoryT>>, defaultLanguage: string, languageCode: string): {languageCode: string; shortLanguageCode: string} {
+function parseLanguageCode<RepositoryT> (
+  repository: Readonly<Repository<RepositoryT>>, defaultLanguage: string,
+  languageCode: string
+): { languageCode: string; shortLanguageCode: string } {
   let code = languageCode.toLowerCase()
   const shortCode = shortLanguageCodeFromLong(code)
 
@@ -83,6 +100,6 @@ function parseLanguageCode<RepositoryT>(repository: Readonly<Repository<Reposito
   }
 }
 
-function shortLanguageCodeFromLong(languageCode: string): string {
+function shortLanguageCodeFromLong (languageCode: string): string {
   return languageCode.split('-')[0]!
 }
