@@ -55,7 +55,7 @@ function parseTemplateParams (resourceKey: string, template: string, globalTempl
     let skipNode: any = null
     traverse(tree, {
       enter (node: any) {
-        if (skipNode) {
+        if (skipNode && node.type !== 'CallExpression') {
           return
         }
         switch (node.type) {

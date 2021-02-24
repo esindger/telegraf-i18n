@@ -3,7 +3,7 @@ import { generateTypes } from '../src'
 
 test('types generator', t => {
   const types = generateTypes({
-    greeting: '`${foo(bar.baz)}`'
+    greeting: '`${foo(gc(bar.baz))}`'
   })
 
   t.log(types)
