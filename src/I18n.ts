@@ -3,7 +3,8 @@ import * as yaml from 'js-yaml'
 import * as path from 'path'
 
 import { Context as TelegrafContext, MiddlewareFn } from 'telegraf'
-import { ExtraReplyMessage, Message } from 'telegraf/typings/telegram-types'
+import { ExtraReplyMessage } from 'telegraf/typings/telegram-types'
+import { Message } from 'typegram'
 import { I18nContext } from './context'
 import { pluralize } from './pluralize'
 
